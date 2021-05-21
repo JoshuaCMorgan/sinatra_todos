@@ -1,6 +1,7 @@
 <form action="/lists" method="post">
   <dl>
     <dt>
+      <p class="flash error"><%= session[:error] %></p>
       <label for="list_name">Enter the name for your new list:</label>
     </dt>
     <dd>
