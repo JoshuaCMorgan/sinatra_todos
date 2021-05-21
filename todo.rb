@@ -31,7 +31,7 @@ post "/lists" do
   # remove unnecessary white-space
   list_name = params[:list_name].strip
   # Have user enter list name again if nothing is entered or is more than 100 characters
-  if list_name.size >= 1 && list_name.size <= 100
+  if (1..100).cover?(list_name.size)
     session[:lists] << {name: list_name, todos: []}
     session[:success] = "The list has been created."
     redirect "/lists"
