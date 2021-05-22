@@ -1,6 +1,7 @@
 require "sinatra"
 require "sinatra/reloader"
 require "tilt/erubis"
+require "sinatra/content_for"
 
 configure do
   enable :sessions
@@ -28,6 +29,7 @@ get "/lists/new" do
 end
 
 get "/lists/:id" do 
+  p @url
   # get the todos from this particular list
   # send to view template
  @number = params[:id].to_i
@@ -44,12 +46,14 @@ post "/list/:id" do
 end
 
 # Return an error message if the name is invalid. Return nil if valid.
-def error_for_list_name(name)
-  if !(1..100).cover?(name.size)
-    return  "List name must be between 1 and 100 characters."
-  elsif session[:lists].any? {|list| list[:name] == name}
-    return  "List name must be unique."
-  end
+helpers do 
+  def error_for_list_name(name)
+    if !(1..100).cover?(name.size)
+      return  "List name must be between 1 and 100 characters."
+    elsif session[:lists].any? {|list| list[:name] == name}
+      return  "List name must be unique."
+    end
+  end 
 end 
 
 # Create a new list
