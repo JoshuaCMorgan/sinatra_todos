@@ -29,20 +29,47 @@ get "/lists/new" do
 end
 
 get "/lists/:id" do 
-  p @url
   # get the todos from this particular list
   # send to view template
- @number = params[:id].to_i
- @list = session[:lists][@number]
+ @id = params[:id].to_i
+ @list = session[:lists][@id]
  
  erb(:list, layout: :layout)
 end
 
-post "/list/:id" do 
-  @number = params[:id].to_i
- todo = params[:todo_item]
- @list = session[:lists][@number]
-  erb(:todos, layout: :layout)
+post "/lists/:id/todos" do 
+  @id = params[:id].to_i
+  todo = params[:todo_item]
+  @list = session[:lists][@id]
+  @list[:todos] << todo
+
+  erb(:list, layout: :layout)
+end
+
+# Edit an existing todo list
+get "/lists/:id/edit" do 
+  @id = params[:id].to_i
+  @list = session[:lists][@id]
+
+  erb(:edit_list, layout: :layout)
+end
+
+# Udpate an exisiting todo list
+post "/lists/:id" do
+  list_name = params[:list_name].strip
+  @id = params[:id].to_i
+  @list = session[:lists][@id]
+
+  error = error_for_list_name(list_name)
+  if error
+    @list = session[:lists][@id]
+    session[:error] = error
+    erb(:edit_list, layout: :layout)
+  else
+    @list[:name] = list_name
+    session[:success] = "The list has been updated."
+    redirect "/lists/#{@id}"
+  end
 end
 
 # Return an error message if the name is invalid. Return nil if valid.
