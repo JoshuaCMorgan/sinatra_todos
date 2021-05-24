@@ -12,17 +12,22 @@
 <% content_for :header_links do %>
   <a class="list" href="/lists">All Lists</a>
 <%end %>
-<ul>
-<li><%= @list[:todos] %></li>
-</ul>
+
+<section id="todos">
+  <ul>
+    <% @list[:todos].each_with_index do |todo, index| %>
+    <li><h3><%= todo[:name] %></h3></li>
+    <% end %>
+  </ul>
+<section id="todos">
 
 <form action="/lists/<%= @id %>/todos" method="post">
   <dl>
     <dt>
-      <label for="todo_item">Enter a  new todo item:</label>
+      <label for="todo">Enter a  new todo item:</label>
     </dt>
     <dd>
-      <input name="todo_item" placeholder="Todo text" type="text" value="">
+      <input name="todo" id="todo" placeholder="Something to do" type="text" value="">
     </dd>
   </dl>
   <fieldset class="actions">

@@ -28,6 +28,7 @@ get "/lists/new" do
   erb(:new_list, layout: :layout)
 end
 
+# Render a list with ability ta add todo item
 get "/lists/:id" do 
   # get the todos from this particular list
   # send to view template
@@ -37,29 +38,22 @@ get "/lists/:id" do
  erb(:list, layout: :layout)
 end
 
-post "/lists/:id/todos" do 
-  @id = params[:id].to_i
-  todo = params[:todo_item]
-  @list = session[:lists][@id]
-  @list[:todos] << todo
-
-  erb(:list, layout: :layout)
-end
 
 # Edit an existing todo list
 get "/lists/:id/edit" do 
   @id = params[:id].to_i
   @list = session[:lists][@id]
-
+  
   erb(:edit_list, layout: :layout)
 end
+
 
 # Udpate an exisiting todo list
 post "/lists/:id" do
   list_name = params[:list_name].strip
   @id = params[:id].to_i
   @list = session[:lists][@id]
-
+  
   error = error_for_list_name(list_name)
   if error
     @list = session[:lists][@id]
@@ -97,4 +91,25 @@ post "/lists" do
     session[:success] = "The list has been created."
     redirect "/lists"
   end 
+end
+
+# Delete a list from session
+post "/lists/:id/delete" do 
+  id = params[:id].to_i
+  session[:lists].delete_at(id)
+  
+  session[:success] = "The list has been deleted."
+  
+  redirect "/lists"
+end
+
+# Add a new todo to a list
+post "/lists/:list_id/todos" do 
+  list_id = params[:list_id].to_i
+  list = session[:lists][list_id]
+  list[:todos] << {name: params[:todo], completed: false}
+  
+  session[:success] = "The todo was added."
+  
+  redirect "lists/#{list_id}"
 end

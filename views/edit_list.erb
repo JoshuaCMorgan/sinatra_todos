@@ -3,7 +3,9 @@
     <h2>Editing '<%= @list[:name] %>'</h2>
     <ul>
       <li>
-       <button class="delete">Delete List</button>
+       <form action="/lists/<%= @id %>/delete" method="post">
+        <button type="submit" class="delete">Delete List</button>
+       </form>
       </li>
     </ul>
   </header>
