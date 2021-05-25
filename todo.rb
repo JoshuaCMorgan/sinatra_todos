@@ -133,5 +133,5 @@ post "/lists/:list_id/todos/:id/delete" do
   todo_id = params[:id].to_i
   @list[:todos].delete_at(todo_id)
   session[:sucess] = "The todo has been deleted."
- # redirect "/lists/#{@list_id}"
+  redirect "/lists/#{@list_id}"
 end
