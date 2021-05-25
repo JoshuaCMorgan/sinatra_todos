@@ -132,7 +132,7 @@ post "/lists/:list_id/todos/:id/delete" do
 
   todo_id = params[:id].to_i
   @list[:todos].delete_at(todo_id)
-  session[:sucess] = "The todo has been deleted."
+  session[:success] = "The todo has been deleted."
   redirect "/lists/#{@list_id}"
 end
 
@@ -144,6 +144,6 @@ post "/lists/:list_id/todos/:id" do
   todo_id = params[:id].to_i
   is_completed = params[:completed] == "true"
   @list[:todos][todo_id][:completed] = is_completed
-  session[:sucess] = "The todo has been updated."
+  session[:success] = "The todo has been updated."
   redirect "/lists/#{@list_id}"
 end
