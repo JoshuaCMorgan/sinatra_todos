@@ -19,6 +19,7 @@ end
 # View list of lists
 get "/lists" do
   @lists = session[:lists]
+  p @lists
   erb(:lists, layout: :layout)
 end
 
@@ -34,7 +35,6 @@ get "/lists/:id" do
   # send to view template
  @list_id = params[:id].to_i
  @list = session[:lists][@list_id]
- 
  erb(:list, layout: :layout)
 end
 
@@ -80,7 +80,7 @@ post "/lists" do
   end 
 end
 
-# Udpate an exisiting todo list
+# Udpate an exisiting todo list name
 post "/lists/:id" do
   list_name = params[:list_name].strip
   @id = params[:id].to_i
@@ -121,6 +121,17 @@ post "/lists/:list_id/todos" do
   else
     @list[:todos] << {name: text, completed: false}
     session[:success] = "The todo was added."
-    redirect "lists/#{@list_id}"
+    redirect "/lists/#{@list_id}"
   end
+end
+
+# Delete a todo item from a list
+post "/lists/:list_id/todos/:id/delete" do
+  @list_id = params[:list_id].to_i
+  @list = session[:lists][list_id]
+
+  todo_id = params[:id].to_i
+  @list[:todos].delete_at(todo_id)
+  session[:sucess] = "The todo has been deleted."
+  redirect "/lists/#{@list_id}"
 end
