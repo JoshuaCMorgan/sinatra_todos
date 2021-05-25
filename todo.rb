@@ -128,7 +128,7 @@ end
 # Delete a todo item from a list
 post "/lists/:list_id/todos/:id/delete" do
   @list_id = params[:list_id].to_i
-  @list = session[:lists][list_id]
+  @list = session[:lists][@list_id]
 
   todo_id = params[:id].to_i
   @list[:todos].delete_at(todo_id)
