@@ -135,3 +135,15 @@ post "/lists/:list_id/todos/:id/delete" do
   session[:sucess] = "The todo has been deleted."
   redirect "/lists/#{@list_id}"
 end
+
+# Complete a todo from a list
+post "/lists/:list_id/todos/:id" do 
+  @list_id = params[:list_id].to_i
+  @list = session[:lists][@list_id]
+  
+  todo_id = params[:id].to_i
+  @list[:todos][todo_id][:completed] = true
+  session[:sucess] = "The todo has been completed."
+  @list[:todos][todo_id]
+  redirect "/lists/#{@list_id}"
+end
