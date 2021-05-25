@@ -121,16 +121,17 @@ post "/lists/:list_id/todos" do
   else
     @list[:todos] << {name: text, completed: false}
     session[:success] = "The todo was added."
-    redirect "lists/#{@list_id}"
+    redirect "/lists/#{@list_id}"
   end
 end
 
 # Delete a todo item from a list
-post "/lists/:list_id/todos/:todo_id/delete" do
-  list_id = params[:list_id].to_i
-  todo_id = params[:todo_id].to_i
-  list = session[:lists][list_id]
-  todos = list[:todos]
-  todos.delete_at(todo_id)
-  redirect "lists/#{list_id}"
+post "/lists/:list_id/todos/:id/delete" do
+  @list_id = params[:list_id].to_i
+  @list = session[:lists][list_id]
+
+  todo_id = params[:id].to_i
+  @list[:todos].delete_at(todo_id)
+  session[:sucess] = "The todo has been deleted."
+  redirect "/lists/#{@list_id}"
 end
