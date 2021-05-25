@@ -136,7 +136,7 @@ post "/lists/:list_id/todos/:id/delete" do
   redirect "/lists/#{@list_id}"
 end
 
-# Complete a todo from a list
+# Update  the status of a todo
 post "/lists/:list_id/todos/:id" do 
   @list_id = params[:list_id].to_i
   @list = session[:lists][@list_id]
