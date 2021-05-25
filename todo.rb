@@ -142,8 +142,8 @@ post "/lists/:list_id/todos/:id" do
   @list = session[:lists][@list_id]
   
   todo_id = params[:id].to_i
-  @list[:todos][todo_id][:completed] = true
-  session[:sucess] = "The todo has been completed."
-  @list[:todos][todo_id]
+  is_completed = params[:completed] == "true"
+  @list[:todos][todo_id][:completed] = is_completed
+  session[:sucess] = "The todo has been updated."
   redirect "/lists/#{@list_id}"
 end
