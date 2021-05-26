@@ -1,3 +1,4 @@
+
 <section id="todos" class="<%= list_class(@list) %>">
   <header>
     <h2><%= @list[:name] %></h2>
@@ -14,7 +15,7 @@
   </header>
 
   <ul>
-    <% @list[:todos].each_with_index do |todo, index| %>
+  <% @list[:todos].each_with_index do |todo, index| %>
     <% if todo[:completed] %>
       <li class="complete">
     <% else %>
@@ -29,7 +30,7 @@
         <button type="submit">Delete</button>
       </form>
     </li>
-    <% end %>
+   <% end %>
   </ul>
 </section> 
 

@@ -12,6 +12,41 @@ before do
   session[:lists] ||= []
 end
 
+get "/" do
+ redirect "/lists"
+end
+
+# View list of lists
+get "/lists" do
+  @lists = session[:lists]
+  erb(:lists, layout: :layout)
+end
+
+
+# Render the new list form
+get "/lists/new" do 
+  erb(:new_list, layout: :layout)
+end
+
+# Render a list with ability ta add todo item
+get "/lists/:id" do 
+  # get the todos from this particular list
+  # send to view template
+ @list_id = params[:id].to_i
+ @lists = session[:lists]
+ @list = session[:lists][@list_id]
+ erb(:list, layout: :layout)
+end
+
+
+# Edit an existing todo list
+get "/lists/:id/edit" do 
+  @id = params[:id].to_i
+  @list = session[:lists][@id]
+  
+  erb(:edit_list, layout: :layout)
+end
+
 helpers do 
   def list_complete?(list)
     has_a_todo = todos_count(list) > 0
@@ -30,41 +65,23 @@ helpers do
   def todos_remaining_count(list)
     list[:todos].count {|todo| !todo[:completed]}
   end
+
+  def sort_lists(lists, &block)
+    incomplete_lists = {}
+    complete_lists = {}
+
+    lists.each_with_index do |list, index|
+      if list_complete?(list)
+        complete_lists[index] = list
+      else
+        incomplete_lists[index] = list
+      end
+    end
+    
+    incomplete_lists.each {|id, list| yield(list, id)}
+    complete_lists.each {|id, list| yield(list, id)}
+  end
 end 
-
-get "/" do
- redirect "/lists"
-end
-
-# View list of lists
-get "/lists" do
-  erb(:lists, layout: :layout)
-end
-
-
-# Render the new list form
-get "/lists/new" do 
-  erb(:new_list, layout: :layout)
-end
-
-# Render a list with ability ta add todo item
-get "/lists/:id" do 
-  # get the todos from this particular list
-  # send to view template
- @list_id = params[:id].to_i
- @list = session[:lists][@list_id]
- erb(:list, layout: :layout)
-end
-
-
-# Edit an existing todo list
-get "/lists/:id/edit" do 
-  @id = params[:id].to_i
-  @list = session[:lists][@id]
-  
-  erb(:edit_list, layout: :layout)
-end
-
 
 def error_for_list_name(name)
   if !(1..100).cover?(name.size)
