@@ -19,7 +19,6 @@ end
 # View list of lists
 get "/lists" do
   @lists = session[:lists]
-  p @lists
   erb(:lists, layout: :layout)
 end
 
@@ -60,6 +59,12 @@ helpers do
   def error_for_todo(name)
     if !(1..100).cover?(name.size)
       "Todo must be between 1 and 100 characters."
+    end
+  end
+
+  def complete_all(todos)
+    todos.each do |todo|
+      todo[:completed] = true
     end
   end
 end 
@@ -136,7 +141,7 @@ post "/lists/:list_id/todos/:id/delete" do
   redirect "/lists/#{@list_id}"
 end
 
-# Update  the status of a todo
+# Update the status of a todo
 post "/lists/:list_id/todos/:id" do 
   @list_id = params[:list_id].to_i
   @list = session[:lists][@list_id]
@@ -145,5 +150,18 @@ post "/lists/:list_id/todos/:id" do
   is_completed = params[:completed] == "true"
   @list[:todos][todo_id][:completed] = is_completed
   session[:success] = "The todo has been updated."
+  redirect "/lists/#{@list_id}"
+end
+
+# Mark all todos as complete
+post "/lists/:id/complete_all" do
+
+  @list_id = params[:id].to_i
+  @list = session[:lists][@list_id]
+
+  todos = @list[:todos]
+  complete_all(todos)
+
+  session[:success] = "All todos have been completed."
   redirect "/lists/#{@list_id}"
 end
