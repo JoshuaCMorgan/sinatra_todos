@@ -48,24 +48,19 @@ end
 
 # Return an error message if the name is invalid. Return nil if valid.
 helpers do 
-  def error_for_list_name(name)
-    if !(1..100).cover?(name.size)
-      return  "List name must be between 1 and 100 characters."
-    elsif session[:lists].any? {|list| list[:name] == name}
-      return  "List name must be unique."
+  def all_complete?(todos)
+    all_complete = todos.all? { |todo| todo[:completed] == true }
+    if all_complete
+     "class='complete'"
     end
-  end 
+  end  
+end 
 
-  def error_for_todo(name)
-    if !(1..100).cover?(name.size)
-      "Todo must be between 1 and 100 characters."
-    end
-  end
-
-  def complete_all(todos)
-    todos.each do |todo|
-      todo[:completed] = true
-    end
+def error_for_list_name(name)
+  if !(1..100).cover?(name.size)
+    return  "List name must be between 1 and 100 characters."
+  elsif session[:lists].any? {|list| list[:name] == name}
+    return  "List name must be unique."
   end
 end 
 
@@ -113,12 +108,18 @@ post "/lists/:id/delete" do
   redirect "/lists"
 end
 
+def error_for_todo(name)
+  if !(1..100).cover?(name.size)
+    "Todo must be between 1 and 100 characters."
+  end
+end
+
 # Add a new todo to a list
 post "/lists/:list_id/todos" do 
   @list_id = params[:list_id].to_i
   @list = session[:lists][@list_id]
   text = params[:todo].strip
-
+  
   error = error_for_todo(text)
   if error
     session[:error] = error
@@ -134,14 +135,14 @@ end
 post "/lists/:list_id/todos/:id/delete" do
   @list_id = params[:list_id].to_i
   @list = session[:lists][@list_id]
-
+  
   todo_id = params[:id].to_i
   @list[:todos].delete_at(todo_id)
   session[:success] = "The todo has been deleted."
   redirect "/lists/#{@list_id}"
 end
 
-# Update the status of a todo
+# Update the status of a todo: complete or undo complete
 post "/lists/:list_id/todos/:id" do 
   @list_id = params[:list_id].to_i
   @list = session[:lists][@list_id]
@@ -153,15 +154,18 @@ post "/lists/:list_id/todos/:id" do
   redirect "/lists/#{@list_id}"
 end
 
+def complete_all(todos)
+  todos.each do |todo|
+    todo[:completed] = true
+  end
+end
 # Mark all todos as complete
 post "/lists/:id/complete_all" do
-
   @list_id = params[:id].to_i
-  @list = session[:lists][@list_id]
-
-  todos = @list[:todos]
-  complete_all(todos)
-
+  p @list = session[:lists][@list_id]
+  
+  p @todos = @list[:todos]
+  complete_all(@todos)
   session[:success] = "All todos have been completed."
   redirect "/lists/#{@list_id}"
 end
