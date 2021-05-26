@@ -46,14 +46,24 @@ get "/lists/:id/edit" do
   erb(:edit_list, layout: :layout)
 end
 
-# Return an error message if the name is invalid. Return nil if valid.
 helpers do 
-  def all_complete?(todos)
-    all_complete = todos.all? { |todo| todo[:completed] == true }
-    if all_complete
-     "class='complete'"
-    end
-  end  
+  def list_complete?(list)
+    has_a_todo = todos_count(list) > 0
+    all_complete = todos_remaining_count(list) == 0
+    has_a_todo && all_complete
+  end
+
+  def list_class(list)
+   "complete" if list_complete?(list)
+  end
+
+  def todos_count(list)
+    list[:todos].size
+  end
+
+  def todos_remaining_count(list)
+    list[:todos].count {|todo| !todo[:completed]}
+  end
 end 
 
 def error_for_list_name(name)
