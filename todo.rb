@@ -60,7 +60,7 @@ helpers do
   def todos_remaining_count(list)
     list[:todos].count {|todo| !todo[:completed]}
   end
-  
+
   def list_complete?(list)
     has_a_todo = todos_count(list) > 0
     all_complete = todos_remaining_count(list) == 0
@@ -68,19 +68,17 @@ helpers do
   end
 
   def sort_lists(lists, &block)
-    incomplete_lists = {}
-    complete_lists = {}
+    complete_lists, incomplete_lists = lists.partition { |list| list_complete?(list) }
+   
+    incomplete_lists.each { |list| yield(list, lists.index(list)) }
+    complete_lists.each { |list| yield(list, lists.index(list)) }
+  end
 
-    lists.each_with_index do |list, index|
-      if list_complete?(list)
-        complete_lists[list] = index
-      else
-        incomplete_lists[list] = index
-      end
-    end
+  def sort_todos(todos, &block)
+    complete_todos, incomplete_todos = todos.partition { |todo| todo[:completed] }
 
-    incomplete_lists.each(&block)
-    complete_lists.each(&block)
+    incomplete_todos.each { |todo| yield(todo, todos.index(todo)) }
+    complete_todos.each  { |todo| yield(todo, todos.index(todo)) }
   end
 end 
 
