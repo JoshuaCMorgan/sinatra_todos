@@ -11,4 +11,4 @@ It's a simple implementation of a todos program that lets you keep track of a li
 
 - describes what code must be run when the application is started.
 
-https://ls-170-sinatra-todos.herokuapp.com/lists
+https://ls-josh-sinatra-todo.herokuapp.com/ | https://git.heroku.com/ls-josh-sinatra-todo.git
