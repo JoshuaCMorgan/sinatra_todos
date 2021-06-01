@@ -182,13 +182,11 @@ post "/lists/:list_id/todos/:id" do
   todo_id = params[:id].to_i
   is_completed = params[:completed] == "true"
   @list[:todos][todo_id][:completed] = is_completed
-  
+
   session[:success] = "The todo has been updated."
   redirect "/lists/#{@list_id}"
 end
 
-
-end
 # Mark all todos as complete
 post "/lists/:id/complete_all" do
   @list_id = params[:id].to_i
