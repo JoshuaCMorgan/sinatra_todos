@@ -36,7 +36,6 @@ helpers do
   end
 
   def sort_todos(todos, &block)
-    puts "todos: #{todos}"
     complete_todos, incomplete_todos = todos.partition { |todo| todo[:completed] }
 
     incomplete_todos.each(&block)
@@ -166,7 +165,6 @@ post "/lists/:list_id/todos" do
   else
     id = next_element_id(@list[:todos])
     @list[:todos] << {id: id, name: text, completed: false}
-    p @list
     session[:success] = "The todo was added."
     redirect "/lists/#{@list_id}"
   end
@@ -179,7 +177,6 @@ post "/lists/:list_id/todos/:id/delete" do
   
   todo_id = params[:id].to_i
   @list[:todos].reject! { |todo| todo[:id] == todo_id }
-  p @list
 
   if env["HTTP_X_REQUESTED_WITH"] == "XMLHttpRequest"
     status 204
