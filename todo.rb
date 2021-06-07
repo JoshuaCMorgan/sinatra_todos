@@ -9,53 +9,6 @@ configure do
   set :erb, :escape_html => true
 end
 
-before do 
-  session[:lists] ||= []
-end
-
-get "/" do
- redirect "/lists"
-end
-
-# View list of lists
-get "/lists" do
-  @lists = session[:lists]
-  erb(:lists, layout: :layout)
-end
-
-
-# Render the new list form
-get "/lists/new" do 
-  erb(:new_list, layout: :layout)
-end
-=begin
-
-=end
-
-def load_list(index)
-  list = session[:lists][index] if index && session[:lists][index]
-  return list if list
-
-  session[:error] = "The specified list was not found"
-  redirect "/lists"
-end
-
-# Render a list with ability ta add todo item
-get "/lists/:id" do 
-  @list_id = params[:id].to_i
-  @list = load_list(@list_id)
-  erb(:list, layout: :layout)
-end 
-
-
-# Edit an existing todo list
-get "/lists/:id/edit" do 
-  @id = params[:id].to_i
-  @list = load_list(@id)
-  
-  erb(:edit_list, layout: :layout)
-end
-
 helpers do  
   def list_class(list)
     "complete" if list_complete?(list)
@@ -78,23 +31,28 @@ helpers do
   def sort_lists(lists, &block)
     complete_lists, incomplete_lists = lists.partition { |list| list_complete?(list) }
    
-    incomplete_lists.each { |list| yield(list, lists.index(list)) }
-    complete_lists.each { |list| yield(list, lists.index(list)) }
+    incomplete_lists.each(&block)
+    complete_lists.each(&block)
   end
 
   def sort_todos(todos, &block)
+    puts "todos: #{todos}"
     complete_todos, incomplete_todos = todos.partition { |todo| todo[:completed] }
 
     incomplete_todos.each(&block)
     complete_todos.each(&block)
   end
-
-  def next_todo_id(todos)
-    max = todos.map { |todo| todo[:id] }.max || 0
-    max + 1
-  end
 end 
 
+def load_list(list_id)
+  list = session[:lists].find{ |list| list[:id] == list_id }
+  return list if list
+  
+  session[:error] = "The specified list was not found"
+  redirect "/lists"
+end
+
+# Return an error message if the name is invalid. Return nil if name is valid.
 def error_for_list_name(name)
   if !(1..100).cover?(name.size)
     return  "List name must be between 1 and 100 characters."
@@ -102,6 +60,37 @@ def error_for_list_name(name)
     return  "List name must be unique."
   end
 end 
+
+# Return an error message if the name is invalid. Return nil if name is valid.
+def error_for_todo(name)
+  if !(1..100).cover?(name.size)
+    "Todo must be between 1 and 100 characters."
+  end
+end
+
+def next_element_id(elements)
+  max = elements.map { |element| element[:id] }.max || 0
+  max + 1
+end
+
+before do 
+  session[:lists] ||= []
+end
+
+get "/" do
+  redirect "/lists"
+end
+
+# View list of lists
+get "/lists" do
+  @lists = session[:lists]
+  erb(:lists, layout: :layout)
+end
+
+# Render the new list form
+get "/lists/new" do 
+  erb(:new_list, layout: :layout)
+end
 
 # Create a new list
 post "/lists" do 
@@ -113,10 +102,25 @@ post "/lists" do
     session[:error] = error
     erb(:new_list, layout: :layout)
   else
-    session[:lists] << {name: list_name, todos: []}
+    id = next_element_id(session[:lists])
+    session[:lists] << {id: id, name: list_name, todos: []}
     session[:success] = "The list has been created."
     redirect "/lists"
   end 
+end
+
+# View a single todo list 
+get "/lists/:id" do 
+  @list_id = params[:id].to_i
+  @list = load_list(@list_id)
+  erb(:list, layout: :layout)
+end 
+
+# Edit an existing todo list
+get "/lists/:id/edit" do 
+  @id = params[:id].to_i
+  @list = load_list(@id)
+  erb(:edit_list, layout: :layout)
 end
 
 # Udpate an exisiting todo list name
@@ -137,21 +141,15 @@ post "/lists/:id" do
   end
 end
 
-# Delete a list from session
+# Delete a todo list
 post "/lists/:id/delete" do 
   id = params[:id].to_i
-  session[:lists].delete_at(id)
+  session[:lists].reject! { |list| list[:id] == id }
   if env["HTTP_X_REQUESTED_WITH"] == "XMLHttpRequest"
     "/lists"
   else
     session[:success] = "The list has been deleted."
     redirect "/lists"
-  end
-end
-
-def error_for_todo(name)
-  if !(1..100).cover?(name.size)
-    "Todo must be between 1 and 100 characters."
   end
 end
 
@@ -166,8 +164,7 @@ post "/lists/:list_id/todos" do
     session[:error] = error
     erb(:list, layout: :layout)
   else
-    # give each new todo a unique identifier, name, completed state.
-    id = next_todo_id(@list[:todos])
+    id = next_element_id(@list[:todos])
     @list[:todos] << {id: id, name: text, completed: false}
     p @list
     session[:success] = "The todo was added."
@@ -192,7 +189,7 @@ post "/lists/:list_id/todos/:id/delete" do
   end
 end
 
-# Update the status of a todo: complete or undo complete
+# Update the status of a todo
 post "/lists/:list_id/todos/:id" do 
   @list_id = params[:list_id].to_i
   @list = load_list(@list_id)
@@ -210,6 +207,7 @@ end
 post "/lists/:id/complete_all" do
   @list_id = params[:id].to_i
   @list = load_list(@list_id)
+
   @list[:todos].each do |todo|
     todo[:completed] = true
   end
